@@ -11,16 +11,32 @@ def get_data():
     import requests
 
     res = requests.get("https://randomuser.me/api/")
-    res = res.json()['results'][0]
+    res = res.json()
+    res = res['results'][0]
 
     return res
 
 def format_data(res):
     data = {}
+    data['first_name'] = res['name']['first']
+    data['last_name'] = res['name']['last']
+    data['gender'] = res['gender']
+    data['email'] = res['email']
+    data['username'] = res['login']['username']
+    data['country'] = res['location']['country']
+    data['state'] = res['location']['state']
+    dob_date = res['dob']['date']
+    data['dob'] = dob_date[8:10] + '-' + dob_date[5:7] + '-' + dob_date[0:4]
+    data['age'] = res['dob']['age']
+    data['picture'] = res['picture']['medium']
+
+    return data
 
 def stream_data():
     import json
-
+    res = get_data()
+    res = format_data(res)
+    print(json.dumps(res,indent=4))
 
 # with DAG('user_automation',
 #         default_args=default_args,
@@ -30,5 +46,4 @@ def stream_data():
 #         task_id='stream_data_from_api',
 #         python_callable=stream_data
 #     )
-
 stream_data()
