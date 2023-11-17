@@ -43,8 +43,6 @@ def stream_data():
     producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000)
     producer.send('users_created', json.dumps(res).encode('utf-8'))
 
-
-
 # with DAG('user_automation',
 #         default_args=default_args,
 #         catchup=False) as dag:
@@ -52,5 +50,6 @@ def stream_data():
 #     streaming_task = PythonOperator(
 #         task_id='stream_data_from_api',
 #         python_callable=stream_data
-#     )
+#     ) 
+
 stream_data()
