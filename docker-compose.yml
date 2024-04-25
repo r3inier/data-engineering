@@ -100,7 +100,7 @@ services:
       - confluent
 
   webserver:
-    image: apache/airflow:latest-python3.10
+    image: apache/airflow:2.6.0-python3.10
     command: webserver
     entrypoint: ['/opt/airflow/scripts/entrypoint.sh']
     depends_on:
@@ -108,7 +108,7 @@ services:
     environment:
       - LOAD_EX=n
       - EXECUTOR=Sequential
-      - AIRFLOW__DATABASE_SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       - AIRFLOW_WEBSERVER_SECRET_KEY=this_is_a_very_secured_key
     logging:
       options:
@@ -129,7 +129,7 @@ services:
       - confluent
 
   scheduler:
-    image: apache/airflow:latest-python3.10
+    image: apache/airflow:2.6.0-python3.10
     command: bash -c "pip install -r ./requirements.txt && airflow db upgrade && airflow scheduler"
     depends_on:
       webserver:
@@ -137,7 +137,7 @@ services:
     environment:
       - LOAD_EX=n
       - EXECUTOR=Sequential
-      - AIRFLOW__DATABASE_SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
       - AIRFLOW_WEBSERVER_SECRET_KEY=this_is_a_very_secured_key
     volumes:
       - ./dags:/opt/airflow/dags
@@ -147,7 +147,7 @@ services:
       - confluent
 
   postgres:
-    image: postgres:latest
+    image: postgres:14.0
     environment:
       - POSTGRES_USER=airflow
       - POSTGRES_PASSWORD=airflow

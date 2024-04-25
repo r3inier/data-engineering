@@ -1,10 +1,11 @@
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+import uuid
 
-default_args = {
+args = {
     'owner': 'reinier',
-    'start_date': datetime(2023, 10, 22, 10, 00)
+    'start_date': datetime(2024, 4, 19)
 }
 
 def get_data():
@@ -18,6 +19,7 @@ def get_data():
 
 def format_data(res):
     data = {}
+    data['id'] = uuid.uuid4()
     data['first_name'] = res['name']['first']
     data['last_name'] = res['name']['last']
     data['gender'] = res['gender']
@@ -53,8 +55,9 @@ def stream_data():
             logging.error("An error has occurred: {e}")
             continue
 
-with DAG('user_automation',
-        default_args=default_args,
+with DAG('random_user_automation',
+        default_args=args,
+        schedule_interval='@daily',
         catchup=False) as dag:
 
     streaming_task = PythonOperator(
