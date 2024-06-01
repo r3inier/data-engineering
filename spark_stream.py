@@ -53,7 +53,7 @@ def insert_data(session, **kwargs):
             gender, email, username, country, state, dob, age, picture)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (id, first_name, last_name, gender, email, username, country, state, dob, age, picture))
-        logging.info(f"Data inserted for {first_name} {last_name}")
+        print("Data inserted for {first_name} {last_name}")
     except Exception as e:
         logging.error(f"Could not insert data due to {e}")
 
@@ -66,13 +66,14 @@ def create_spark_connection():
     try:
         s_conn = SparkSession.builder \
         .appName('SparkDataStreaming') \
-        .config('spark.jars.packages',  "com.datastax.spark:spark-cassandra-connector_2.13:3.4.1,"
-                                        "org.apache.spark:spark-sql-kafka-0-10_2.13:3.4.1") \
+        .config('spark.jars.packages',  "com.datastax.spark:spark-cassandra-connector_2.12:3.5.0,"
+                                        "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,"
+                                        "org.scala-lang:scala-library:2.12.8") \
         .config('spark.cassandra.connection.host', 'localhost') \
         .getOrCreate()
 
         s_conn.sparkContext.setLogLevel("ERROR")
-        logging.info("Spark connection created successfully")
+        print("Spark connection created successfully")
     except Exception as e:
         logging.error(f"Couldn't create the spark session due to exception: {e}")
     
@@ -84,8 +85,8 @@ def create_cassandra_connection():
 
         cassandra_sess = cluster.connect()
         return cassandra_sess
-    except:
-        logging.error(f"Couldn't create the spark session due to exception: {e}")
+    except Exception as e:
+        logging.error(f"Couldn't create the cassandra connection due to exception: {e}")
         return None
     
 def connect_to_kafka(spark_conn):
@@ -98,7 +99,7 @@ def connect_to_kafka(spark_conn):
             .option('subscribe', 'users_created') \
             .option('startingOffsets', 'earliest') \
             .load()
-        logging.info("Kafka dataframe created successfully")
+        print("Kafka dataframe created successfully")
     except Exception as e:
         logging.warning(f"Kafka dataframe could not be created because: {e}")
 
@@ -121,27 +122,22 @@ def create_selection_df_from_kafka(spark_df):
 
     sel = spark_df.selectExpr("CAST(value AS STRING)") \
         .select(from_json(col('value'), schema).alias('data')).select("data.*")
+    
     print(sel)
 
     return sel
 
 if __name__ == "__main__":
     spark_conn = create_spark_connection()
-    print("a")
     if spark_conn is not None:
-        print("b")
         spark_df = connect_to_kafka(spark_conn)
-        print("c")
         selection_df = create_selection_df_from_kafka(spark_df)
-        print("d")
         cass_sess = create_cassandra_connection()
-        print("e")
         if cass_sess is not None:
-            print("f")
             create_keyspace(cass_sess)
             create_table(cass_sess)
 
-            logging.info("Streaming is starting...")
+            print("Streaming is starting...")
 
             streaming_query = (selection_df.writeStream.format("org.apache.spark.sql.cassandra")
                                .option('checkpointLocation', '/tmp/checkpoint')
