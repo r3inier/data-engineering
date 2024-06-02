@@ -67,8 +67,7 @@ def create_spark_connection():
         s_conn = SparkSession.builder \
         .appName('SparkDataStreaming') \
         .config('spark.jars.packages',  "com.datastax.spark:spark-cassandra-connector_2.12:3.5.0,"
-                                        "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,"
-                                        "org.scala-lang:scala-library:2.12.8") \
+                                        "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1") \
         .config('spark.cassandra.connection.host', 'localhost') \
         .getOrCreate()
 
@@ -81,7 +80,7 @@ def create_spark_connection():
 
 def create_cassandra_connection():
     try:
-        cluster = Cluster(['localhost'])
+        cluster = Cluster(['localhost'], connect_timeout=20)
 
         cassandra_sess = cluster.connect()
         print("Cassandra connection created successfully")
