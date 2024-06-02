@@ -84,6 +84,7 @@ def create_cassandra_connection():
         cluster = Cluster(['localhost'])
 
         cassandra_sess = cluster.connect()
+        print("Cassandra connection created successfully")
         return cassandra_sess
     except Exception as e:
         logging.error(f"Couldn't create the cassandra connection due to exception: {e}")
