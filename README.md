@@ -1,4 +1,4 @@
-# data-engineering
+# Real-Time Data Streaming
 
 Start project:  
 1. `source venv/bin/activate`  
